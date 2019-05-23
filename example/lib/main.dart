@@ -93,6 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   StreamSubscription<WebViewHttpError> _onHttpError;
 
+  StreamSubscription<String> _onPostMessage;
+
   StreamSubscription<double> _onProgressChanged;
 
   StreamSubscription<double> _onScrollYChanged;
@@ -173,6 +175,15 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       }
     });
+
+    _onPostMessage = flutterWebViewPlugin.onPostMessage.listen((String message) {
+      print('Main: post message');
+      if (mounted) {
+        setState(() {
+          _history.add('onPostMessage: $message');
+        });
+      }
+    });
   }
 
   @override
@@ -185,6 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _onProgressChanged.cancel();
     _onScrollXChanged.cancel();
     _onScrollYChanged.cancel();
+    _onPostMessage.cancel();
 
     flutterWebViewPlugin.dispose();
 
