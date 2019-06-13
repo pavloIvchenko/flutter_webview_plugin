@@ -159,14 +159,6 @@ class WebviewManager {
 
         webView.setWebViewClient(webViewClient);
         webView.addJavascriptInterface(new WebAppInterface(), "Android");
-        public class WebAppInterface {
-            @JavascriptInterface
-            public void getPostMessage(String value){
-                Map<String, Object> postMessageMap = new HashMap<>();
-                postMessageMap.put("order", value);
-                FlutterWebviewPlugin.channel.invokeMethod("onOrderRequest", postMessageMap);
-            }
-        }
         webView.setWebChromeClient(new WebChromeClient()
         {
             //The undocumented magic method override
@@ -252,6 +244,15 @@ class WebviewManager {
                 Map<String, Object> args = new HashMap<>();
                 args.put("progress", progress / 100.0);
                 FlutterWebviewPlugin.channel.invokeMethod("onProgressChanged", args);
+            }
+
+            public class WebAppInterface {
+                @JavascriptInterface
+                public void getPostMessage(String value){
+                    Map<String, Object> postMessageMap = new HashMap<>();
+                    postMessageMap.put("order", value);
+                    FlutterWebviewPlugin.channel.invokeMethod("onOrderRequest", postMessageMap);
+                }
             }
         });
     }
