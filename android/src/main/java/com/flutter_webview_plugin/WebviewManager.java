@@ -117,14 +117,16 @@ class WebviewManager {
     boolean closed = false;
     WebView webView;
     Activity activity;
+    MethodChannel channel;
     BrowserClient webViewClient;
     ResultHandler resultHandler;
     Context context;
 
-    WebviewManager(final Activity activity, final Context context) {
+    WebviewManager(final Activity activity, final Context context, final MethodChannel channel) {
         this.webView = new ObservableWebView(activity);
         this.activity = activity;
         this.context = context;
+        this.channel = channel;
         this.resultHandler = new ResultHandler();
         webViewClient = new BrowserClient();
         webView.setOnKeyListener(new View.OnKeyListener() {
@@ -158,7 +160,8 @@ class WebviewManager {
         });
 
         webView.setWebViewClient(webViewClient);
-        webView.addJavascriptInterface(new WebAppInterface(), "Android");
+        webView.addJavascriptInterface(new JavaScriptChannel(channel, "Android"), "Android");
+        //webView.addJavascriptInterface(new WebAppInterface(), "Android");
         webView.setWebChromeClient(new WebChromeClient()
         {
             //The undocumented magic method override
@@ -244,18 +247,6 @@ class WebviewManager {
                 Map<String, Object> args = new HashMap<>();
                 args.put("progress", progress / 100.0);
                 FlutterWebviewPlugin.channel.invokeMethod("onProgressChanged", args);
-            }
-
-            @Override
-            public void getPostMessage(String value){
-                Map<String, Object> postMessageMap = new HashMap<>();
-                postMessageMap.put("order", value);
-                FlutterWebviewPlugin.channel.invokeMethod("onOrderRequest", postMessageMap);
-            }
-
-            public class WebAppInterface {
-                @JavascriptInterface
-                getPostMessage(String value);
             }
         });
     }
@@ -508,5 +499,42 @@ class WebviewManager {
         if (webView != null){
             webView.stopLoading();
         }
+    }
+    class JavaScriptChannel {
+      private final MethodChannel methodChannel;
+      private final String javaScriptChannelName;
+
+      /**
+       * @param methodChannel the Flutter WebView method channel to which JS messages are sent
+       * @param javaScriptChannelName the name of the JavaScript channel, this is sent over the method
+       *     channel with each message to let the Dart code know which JavaScript channel the message
+       *     was sent through
+       */
+      JavaScriptChannel(MethodChannel methodChannel, String javaScriptChannelName) {
+        this.methodChannel = methodChannel;
+        this.javaScriptChannelName = javaScriptChannelName;
+      }
+
+      // Suppressing unused warning as this is invoked from JavaScript.
+      @SuppressWarnings("unused")
+      @JavascriptInterface
+      public void postMessage(String message) {
+        Map<String, Object> postMessageMap = new HashMap<>();
+        postMessageMap.put("order", value);
+        methodChannel.invokeMethod("onOrderRequest", postMessageMap);
+        // HashMap<String, String> arguments = new HashMap<>();
+        // arguments.put("channel", javaScriptChannelName);
+        // arguments.put("message", message);
+        // methodChannel.invokeMethod("javascriptChannelMessage", arguments);
+      }
+
+                  // public class WebAppInterface {
+                  //     @JavascriptInterface
+                  //     public void getPostMessage(String value){
+                  //         Map<String, Object> postMessageMap = new HashMap<>();
+                  //         postMessageMap.put("order", value);
+                  //         FlutterWebviewPlugin.channel.invokeMethod("onOrderRequest", postMessageMap);
+                  //     }
+                  // }
     }
 }
