@@ -246,13 +246,16 @@ class WebviewManager {
                 FlutterWebviewPlugin.channel.invokeMethod("onProgressChanged", args);
             }
 
+            @Override
+            public void getPostMessage(String value){
+                Map<String, Object> postMessageMap = new HashMap<>();
+                postMessageMap.put("order", value);
+                FlutterWebviewPlugin.channel.invokeMethod("onOrderRequest", postMessageMap);
+            }
+
             public class WebAppInterface {
                 @JavascriptInterface
-                public void getPostMessage(String value){
-                    Map<String, Object> postMessageMap = new HashMap<>();
-                    postMessageMap.put("order", value);
-                    FlutterWebviewPlugin.channel.invokeMethod("onOrderRequest", postMessageMap);
-                }
+                getPostMessage(String value);
             }
         });
     }
