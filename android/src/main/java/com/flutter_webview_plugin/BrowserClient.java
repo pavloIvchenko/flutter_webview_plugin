@@ -7,7 +7,6 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.JavascriptInterface;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,26 +58,6 @@ public class BrowserClient extends WebViewClient {
 
         data.put("type", "finishLoad");
         FlutterWebviewPlugin.channel.invokeMethod("onState", data);
-
-        view.addJavascriptInterface(new JavaScriptChannel(FlutterWebviewPlugin.channel, "Android"), "Android");
-        class JavaScriptChannel {
-            private final MethodChannel methodChannel;
-            private final String javaScriptChannelName;
-
-            JavaScriptChannel(MethodChannel methodChannel, String javaScriptChannelName) {
-                this.methodChannel = methodChannel;
-                this.javaScriptChannelName = javaScriptChannelName;
-            }
-
-            // Suppressing unused warning as this is invoked from JavaScript.
-            @SuppressWarnings("unused")
-            @JavascriptInterface
-            public void postMessage(String message) {
-                Map<String, Object> postMessageMap = new HashMap<>();
-                postMessageMap.put("order", value);
-                methodChannel.invokeMethod("onOrderRequest", postMessageMap);
-            }
-    }
 
     }
 

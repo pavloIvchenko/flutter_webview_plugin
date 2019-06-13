@@ -32,7 +32,7 @@ class FlutterWebviewPlugin {
   final _onProgressChanged = new StreamController<double>.broadcast();
   final _onHttpError = StreamController<WebViewHttpError>.broadcast();
   final _onPostMessage = StreamController<String>.broadcast();
-  final _onPostAndroidMessage = StreamController<String>.broadcast();
+  final _lightningLinkStream = StreamController<String>.broadcast();
 
   Future<Null> _handleMessages(MethodCall call) async {
     switch (call.method) {
@@ -69,7 +69,7 @@ class FlutterWebviewPlugin {
         break;
       case 'onOrderRequest':
         print(call.toString());
-        _onPostAndroidMessage.add(call.arguments['order']);
+        _lightningLinkStream.add(call.arguments['order']);
         break;
     }
   }
@@ -101,7 +101,7 @@ class FlutterWebviewPlugin {
 
   Stream<String> get onPostMessage => _onPostMessage.stream;
 
-  Stream<String> get onPostAndroidMessage => _onPostAndroidMessage.stream;
+  Stream<String> get lightningLinkStream => _lightningLinkStream.stream;
 
   /// Start the Webview with [url]
   /// - [headers] specify additional HTTP headers
@@ -226,7 +226,7 @@ class FlutterWebviewPlugin {
     _onScrollYChanged.close();
     _onHttpError.close();
     _onPostMessage.close();
-    _onPostAndroidMessage.close();
+    _lightningLinkStream.close();
     _instance = null;
   }
 

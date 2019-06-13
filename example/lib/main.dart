@@ -91,8 +91,6 @@ class _MyHomePageState extends State<MyHomePage> {
   // On urlChanged stream
   StreamSubscription<WebViewStateChanged> _onStateChanged;
 
-  StreamSubscription<String> _onPostAndroidMessage;
-
   StreamSubscription<WebViewHttpError> _onHttpError;
 
   StreamSubscription<String> _onPostMessage;
@@ -170,14 +168,6 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
-    _onPostAndroidMessage = flutterWebViewPlugin.onPostAndroidMessage.listen((String message) {
-      if (mounted) {
-        setState(() {
-          _history.add('_onPostAndroidMessage: ${state.type} ${state.url}');
-        });
-      }
-    });
-
     _onHttpError = flutterWebViewPlugin.onHttpError.listen((WebViewHttpError error) {
       if (mounted) {
         setState(() {
@@ -207,7 +197,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _onScrollXChanged.cancel();
     _onScrollYChanged.cancel();
     _onPostMessage.cancel();
-    _onPostAndroidMessage.cancel();
 
     flutterWebViewPlugin.dispose();
 
