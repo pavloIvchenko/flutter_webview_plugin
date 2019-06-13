@@ -501,12 +501,9 @@ class WebviewManager {
     public class WebAppInterface {
         @JavascriptInterface
         public void getPostMessage(String value){
-            Map<String, Object> orderMap = new HashMap<>();
-            orderMap.put("order", value);
-            @Override
-            public void run() {
-              FlutterWebviewPlugin.channel.invokeMethod("onOrderRequest", orderMap);
-            }
+            Map<String, Object> postMessageMap = new HashMap<>();
+            postMessageMap.put("order", value);
+            FlutterWebviewPlugin.channel.invokeMethod("onOrderRequest", postMessageMap);
         }
     }
 }
