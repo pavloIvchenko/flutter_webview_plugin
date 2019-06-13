@@ -1,26 +1,38 @@
 package com.flutter_webview_plugin;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.OpenableColumns;
+import android.os.Build;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
+import android.webkit.CookieManager;
+import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
-import io.flutter.plugin.common.MethodCall;
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
+import android.widget.FrameLayout;
+import android.provider.MediaStore;
+import androidx.core.content.FileProvider;
+import android.database.Cursor;
+import android.provider.OpenableColumns;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.io.File;
+import java.util.Date;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 
-
+import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.MethodChannel;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -135,7 +147,6 @@ class WebviewManager {
         });
 
         ((ObservableWebView) webView).setOnScrollChangedCallback(new ObservableWebView.OnScrollChangedCallback(){
-            @Override
             public void onScroll(int x, int y, int oldx, int oldy){
                 Map<String, Object> yDirection = new HashMap<>();
                 yDirection.put("yDirection", (double)y);
