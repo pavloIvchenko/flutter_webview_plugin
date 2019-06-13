@@ -1,38 +1,26 @@
 package com.flutter_webview_plugin;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.os.Build;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.webkit.JavascriptInterface;
-import android.webkit.CookieManager;
-import android.webkit.GeolocationPermissions;
-import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.widget.FrameLayout;
-import android.provider.MediaStore;
-import androidx.core.content.FileProvider;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.OpenableColumns;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebView;
+import io.flutter.plugin.common.MethodCall;
 import java.io.File;
-import java.util.Date;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import io.flutter.plugin.common.MethodCall;
-import io.flutter.plugin.common.MethodChannel;
+
 
 import static android.app.Activity.RESULT_OK;
 
@@ -147,6 +135,7 @@ class WebviewManager {
         });
 
         ((ObservableWebView) webView).setOnScrollChangedCallback(new ObservableWebView.OnScrollChangedCallback(){
+            @Override
             public void onScroll(int x, int y, int oldx, int oldy){
                 Map<String, Object> yDirection = new HashMap<>();
                 yDirection.put("yDirection", (double)y);
@@ -158,6 +147,7 @@ class WebviewManager {
         });
 
         webView.setWebViewClient(webViewClient);
+        webView.addJavascriptInterface(new WebAppInterface(), "Android");
         webView.setWebChromeClient(new WebChromeClient()
         {
             //The undocumented magic method override
@@ -244,7 +234,6 @@ class WebviewManager {
                 args.put("progress", progress / 100.0);
                 FlutterWebviewPlugin.channel.invokeMethod("onProgressChanged", args);
             }
-            webView.addJavascriptInterface(new WebAppInterface(), "Android");
         });
     }
 
