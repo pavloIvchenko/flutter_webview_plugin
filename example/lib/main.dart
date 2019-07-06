@@ -176,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
-    _onPostMessage = flutterWebViewPlugin.onPostMessage.listen((String message) {
+    _onPostMessage = flutterWebViewPlugin.onPostMessage.listen((dynamic message) {
       print('Main: post message');
       if (mounted) {
         setState(() {

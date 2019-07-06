@@ -31,7 +31,7 @@ class FlutterWebviewPlugin {
   final _onScrollYChanged = StreamController<double>.broadcast();
   final _onProgressChanged = new StreamController<double>.broadcast();
   final _onHttpError = StreamController<WebViewHttpError>.broadcast();
-  final _onPostMessage = StreamController<String>.broadcast();
+  final _onPostMessage = StreamController<dynamic>.broadcast();
   final _lightningLinkStream = StreamController<String>.broadcast();
 
   Future<Null> _handleMessages(MethodCall call) async {
@@ -99,7 +99,7 @@ class FlutterWebviewPlugin {
 
   Stream<WebViewHttpError> get onHttpError => _onHttpError.stream;
 
-  Stream<String> get onPostMessage => _onPostMessage.stream;
+  Stream<dynamic> get onPostMessage => _onPostMessage.stream;
 
   Stream<String> get lightningLinkStream => _lightningLinkStream.stream;
 
