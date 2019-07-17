@@ -1,5 +1,7 @@
 package com.flutter_webview_plugin;
 
+import android.os.*;
+import android.util.Log;
 import android.content.Intent;
 import android.net.Uri;
 import android.annotation.TargetApi;
@@ -10,6 +12,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -155,7 +158,9 @@ class WebviewManager {
                 FlutterWebviewPlugin.channel.invokeMethod("onScrollXChanged", xDirection);
             }
         });
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
         webView.setWebViewClient(webViewClient);
         webView.setWebChromeClient(new WebChromeClient()
         {
@@ -244,6 +249,7 @@ class WebviewManager {
                 FlutterWebviewPlugin.channel.invokeMethod("onProgressChanged", args);
             }
         });
+        webView.addJavascriptInterface(new WebAppInterface(context), "Android");
     }
 
     private Uri getOutputFilename(String intentType) {
@@ -495,4 +501,30 @@ class WebviewManager {
             webView.stopLoading();
         }
     }
+
+    public class WebAppInterface {
+        private Context context;
+        public WebAppInterface(Context context) {
+            this.context = context;
+        }
+        @JavascriptInterface
+        public void postMessage(String value){
+            try {
+                Handler mainHandler = new Handler(context.getMainLooper());
+                // final Map<String, String> postMessageMap = new HashMap<>();
+                // postMessageMap.put("postMessage", value);
+                final String postValue = value;
+                Runnable myRunnable = new Runnable() {
+                    @Override 
+                    public void run() {
+                        FlutterWebviewPlugin.channel.invokeMethod("onPostMessage", postValue);
+                    } 
+                };
+                mainHandler.post(myRunnable);
+            } catch (Exception e) {
+                Log.e("WebView - Post Message", "exception", e);
+            }
+        }
+    }
+
 }

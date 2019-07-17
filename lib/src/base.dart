@@ -68,7 +68,6 @@ class FlutterWebviewPlugin {
         _onPostMessage.add(call.arguments);
         break;
       case 'onOrderRequest':
-        print(call.toString());
         _lightningLinkStream.add(call.arguments['order']);
         break;
     }
