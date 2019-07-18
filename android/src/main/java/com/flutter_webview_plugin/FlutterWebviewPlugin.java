@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.view.Display;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
@@ -110,6 +111,7 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
         FrameLayout.LayoutParams params = buildLayoutParams(call);
 
         activity.addContentView(webViewManager.webView, params);
+        activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         webViewManager.openUrl(withJavascript,
                 clearCache,
