@@ -104,14 +104,13 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
         String invalidUrlRegex = call.argument("invalidUrlRegex");
         boolean geolocationEnabled = call.argument("geolocationEnabled");
 
-        if (webViewManager == null || webViewManager.closed == true) {
-            webViewManager = new WebviewManager(activity, context);
-        }
-
         FrameLayout.LayoutParams params = buildLayoutParams(call);
 
+        if (webViewManager == null || webViewManager.closed == true) {
+            webViewManager = new WebviewManager(activity, context, params);
+        }
+
         activity.addContentView(webViewManager.webView, params);
-        activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         webViewManager.openUrl(withJavascript,
                 clearCache,

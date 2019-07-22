@@ -8,9 +8,11 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.GeolocationPermissions;
@@ -23,6 +25,7 @@ import android.provider.MediaStore;
 import androidx.core.content.FileProvider;
 import android.database.Cursor;
 import android.provider.OpenableColumns;
+import android.graphics.Rect;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -122,11 +125,13 @@ class WebviewManager {
     BrowserClient webViewClient;
     ResultHandler resultHandler;
     Context context;
+    FrameLayout.LayoutParams defaultParams;
 
-    WebviewManager(final Activity activity, final Context context) {
+    WebviewManager(final Activity activity, final Context context, final FrameLayout.LayoutParams defaultParams) {
         this.webView = new ObservableWebView(activity);
         this.activity = activity;
         this.context = context;
+        this.defaultParams = defaultParams;
         this.resultHandler = new ResultHandler();
         webViewClient = new BrowserClient();
         webView.setOnKeyListener(new View.OnKeyListener() {
@@ -161,6 +166,54 @@ class WebviewManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             WebView.setWebContentsDebuggingEnabled(true);
         }
+
+        // Threshold for minimal keyboard height.
+        final int MIN_KEYBOARD_HEIGHT_PX = 150;
+
+        // Top-level window decor view.
+        final View decorView = activity.getWindow().getDecorView();
+
+        // Register global layout listener.
+        decorView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            private final Rect windowVisibleDisplayFrame = new Rect();
+            private int lastVisibleDecorViewHeight;
+
+            @Override
+            public void onGlobalLayout() {
+                // Retrieve visible rectangle inside window.
+                decorView.getWindowVisibleDisplayFrame(windowVisibleDisplayFrame);
+                final int visibleDecorViewHeight = windowVisibleDisplayFrame.height();
+                FrameLayout.LayoutParams params;
+                Display display = activity.getWindowManager().getDefaultDisplay();
+                // Decide whether keyboard is visible from changing decor view height.
+                if (lastVisibleDecorViewHeight != 0) {
+                    if (lastVisibleDecorViewHeight > visibleDecorViewHeight + MIN_KEYBOARD_HEIGHT_PX) {
+                        // Calculate current keyboard height (this includes also navigation bar height when in fullscreen mode).
+                        int currentKeyboardHeight = decorView.getHeight() - windowVisibleDisplayFrame.bottom;
+                        // Notify listener about keyboard being shown.
+                        int width = defaultParams.width;
+                        int height = defaultParams.height - (currentKeyboardHeight - 200);
+                        params = new FrameLayout.LayoutParams(width, height);
+                        params.topMargin = 48;
+                        resize(params);
+                    } else if (lastVisibleDecorViewHeight + MIN_KEYBOARD_HEIGHT_PX < visibleDecorViewHeight) {
+                        resize(defaultParams);
+                    }
+                }
+                // Save current decor view height for the next call.
+                lastVisibleDecorViewHeight = visibleDecorViewHeight;
+            }
+        });
+
+
+        //get the UA of the current running device:
+//        String userAgent = webView.getSettings().getUserAgentString() ;
+        String userAgent = "Mozilla/5.0 (Linux; Android 4.1.1; Galaxy Nexus Build/JRO03C) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19";
+        Log.w("user agent", "User agent");
+        Log.w("user agent", userAgent);
+        //set the UA of the webview to this value:
+        webView.getSettings().setUserAgentString(userAgent);
+
         webView.setWebViewClient(webViewClient);
         webView.setWebChromeClient(new WebChromeClient()
         {
@@ -471,7 +524,9 @@ class WebviewManager {
     }
 
     void resize(FrameLayout.LayoutParams params) {
-        webView.setLayoutParams(params);
+        if (webView != null) {
+            webView.setLayoutParams(params);
+        }
     }
     /**
     * Checks if going back on the Webview is possible.
