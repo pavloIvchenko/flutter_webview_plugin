@@ -185,6 +185,10 @@ class WebviewManager {
                 final int visibleDecorViewHeight = windowVisibleDisplayFrame.height();
                 FrameLayout.LayoutParams params;
                 Display display = activity.getWindowManager().getDefaultDisplay();
+                String webUrl = null;
+                if(webView != null) {
+                    webUrl = webView.getUrl();
+                }
                 // Decide whether keyboard is visible from changing decor view height.
                 if (lastVisibleDecorViewHeight != 0) {
                     if (lastVisibleDecorViewHeight > visibleDecorViewHeight + MIN_KEYBOARD_HEIGHT_PX) {
@@ -195,9 +199,14 @@ class WebviewManager {
                         int height = defaultParams.height - (currentKeyboardHeight - 200);
                         params = new FrameLayout.LayoutParams(width, height);
                         params.topMargin = 48;
-                        resize(params);
+                        if(webUrl == null || webUrl.contains("questionnaire") || webUrl.contains("signup")) {
+                            Log.w("webUrl", "DO RESIZE");
+                            resize(params);
+                        }
                     } else if (lastVisibleDecorViewHeight + MIN_KEYBOARD_HEIGHT_PX < visibleDecorViewHeight) {
-                        resize(defaultParams);
+                        if(webUrl == null || webUrl.contains("questionnaire") || webUrl.contains("signup")) {
+                            resize(defaultParams);
+                        }
                     }
                 }
                 // Save current decor view height for the next call.
