@@ -94,7 +94,9 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
         boolean clearCache = call.argument("clearCache");
         boolean clearCookies = call.argument("clearCookies");
         boolean withZoom = call.argument("withZoom");
+        boolean displayZoomControls = call.argument("displayZoomControls");
         boolean withLocalStorage = call.argument("withLocalStorage");
+        boolean withOverviewMode = call.argument("withOverviewMode");
         boolean supportMultipleWindows = call.argument("supportMultipleWindows");
         boolean appCacheEnabled = call.argument("appCacheEnabled");
         Map<String, String> headers = call.argument("headers");
@@ -103,6 +105,7 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
         boolean useWideViewPort = call.argument("useWideViewPort");
         String invalidUrlRegex = call.argument("invalidUrlRegex");
         boolean geolocationEnabled = call.argument("geolocationEnabled");
+        boolean debuggingEnabled = call.argument("debuggingEnabled");
 
         FrameLayout.LayoutParams params = buildLayoutParams(call);
 
@@ -120,14 +123,17 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
                 url,
                 headers,
                 withZoom,
+                displayZoomControls,
                 withLocalStorage,
+                withOverviewMode,
                 scrollBar,
                 supportMultipleWindows,
                 appCacheEnabled,
                 allowFileURLs,
                 useWideViewPort,
                 invalidUrlRegex,
-                geolocationEnabled
+                geolocationEnabled,
+                debuggingEnabled
         );
         result.success(null);
     }
@@ -199,7 +205,13 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
     private void reloadUrl(MethodCall call, MethodChannel.Result result) {
         if (webViewManager != null) {
             String url = call.argument("url");
-            webViewManager.reloadUrl(url);
+            Map<String, String> headers = call.argument("headers");
+            if (headers != null) {
+                webViewManager.reloadUrl(url, headers);
+            } else {
+                webViewManager.reloadUrl(url);
+            }
+
         }
         result.success(null);
     }

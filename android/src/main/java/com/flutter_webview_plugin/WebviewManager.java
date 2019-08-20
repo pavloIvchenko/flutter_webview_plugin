@@ -310,6 +310,10 @@ class WebviewManager {
                 args.put("progress", progress / 100.0);
                 FlutterWebviewPlugin.channel.invokeMethod("onProgressChanged", args);
             }
+
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                callback.invoke(origin, true, false);
+            }
         });
         webView.addJavascriptInterface(new WebAppInterface(context), "Android");
     }
@@ -407,19 +411,24 @@ class WebviewManager {
             String url,
             Map<String, String> headers,
             boolean withZoom,
+            boolean displayZoomControls,
             boolean withLocalStorage,
+            boolean withOverviewMode,
             boolean scrollBar,
             boolean supportMultipleWindows,
             boolean appCacheEnabled,
             boolean allowFileURLs,
             boolean useWideViewPort,
             String invalidUrlRegex,
-            boolean geolocationEnabled
+            boolean geolocationEnabled,
+            boolean debuggingEnabled
     ) {
         webView.getSettings().setJavaScriptEnabled(withJavascript);
         webView.getSettings().setBuiltInZoomControls(withZoom);
         webView.getSettings().setSupportZoom(withZoom);
+        webView.getSettings().setDisplayZoomControls(displayZoomControls);
         webView.getSettings().setDomStorageEnabled(withLocalStorage);
+        webView.getSettings().setLoadWithOverviewMode(withOverviewMode);
         webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(supportMultipleWindows);
 
         webView.getSettings().setSupportMultipleWindows(supportMultipleWindows);
@@ -430,17 +439,16 @@ class WebviewManager {
         webView.getSettings().setAllowUniversalAccessFromFileURLs(allowFileURLs);
 
         webView.getSettings().setUseWideViewPort(useWideViewPort);
+        
+        // Handle debugging
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            webView.setWebContentsDebuggingEnabled(debuggingEnabled);
+        }
 
         webViewClient.updateInvalidUrlRegex(invalidUrlRegex);
 
         if (geolocationEnabled) {
             webView.getSettings().setGeolocationEnabled(true);
-            webView.setWebChromeClient(new WebChromeClient() {
-                @Override
-                public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                    callback.invoke(origin, true, false);
-                }
-            });
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -476,6 +484,10 @@ class WebviewManager {
 
     void reloadUrl(String url) {
         webView.loadUrl(url);
+    }
+
+    void reloadUrl(String url, Map<String, String> headers) {
+        webView.loadUrl(url, headers);
     }
 
     void close(MethodCall call, MethodChannel.Result result) {
