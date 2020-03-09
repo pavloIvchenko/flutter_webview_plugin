@@ -80,6 +80,12 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
             case "cleanCookies":
                 cleanCookies(call, result);
                 break;
+            case "switchTabsVisibleBoolean":
+                switchTabsVisibleBoolean(call, result);
+                break;
+            case "changeDefaultParams":
+                changeDefaultParams(call, result);
+                break;
             default:
                 result.notImplemented();
                 break;
@@ -158,6 +164,13 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
         return params;
     }
 
+    private void switchTabsVisibleBoolean(MethodCall call, MethodChannel.Result result) {
+        if (webViewManager != null) {
+            webViewManager.switchTabsVisibleBoolean(call, result);
+        }
+        result.success(null);
+    }
+
     private void stopLoading(MethodCall call, MethodChannel.Result result) {
         if (webViewManager != null) {
             webViewManager.stopLoading(call, result);
@@ -226,6 +239,14 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
         if (webViewManager != null) {
             FrameLayout.LayoutParams params = buildLayoutParams(call);
             webViewManager.resize(params);
+        }
+        result.success(null);
+    }
+
+    private void changeDefaultParams(MethodCall call, final MethodChannel.Result result) {
+        if (webViewManager != null) {
+            FrameLayout.LayoutParams params = buildLayoutParams(call);
+            webViewManager.changeDefaultParams(params);
         }
         result.success(null);
     }

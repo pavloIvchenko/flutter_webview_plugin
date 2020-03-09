@@ -120,6 +120,10 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
     configuration.userContentController = [WKUserContentController new];
     [configuration.userContentController addScriptMessageHandler:self name:@"notification"];
+
+    if (@available(iOS 9.0, *)) {
+        configuration.applicationNameForUserAgent = @"Version/8.0.2 Safari/600.2.5";
+    } 
     
     self.webview = [[WKWebView alloc] initWithFrame:rc configuration: configuration];
     self.webview.UIDelegate = self;

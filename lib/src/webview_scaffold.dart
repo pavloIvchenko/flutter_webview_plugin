@@ -177,6 +177,7 @@ class _WebviewScaffoldState extends State<WebviewScaffold> {
               _resizeTimer = Timer(const Duration(milliseconds: 250), () {
                 // avoid resizing to fast when build is called multiple time
                 webviewReference.resize(_rect);
+                webviewReference.changeDefaultParams(_rect);
               });
             }
           }

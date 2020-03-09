@@ -120,6 +120,7 @@ class WebviewManager {
     }
 
     boolean closed = false;
+    boolean bottomTabsVisible = false;
     WebView webView;
     Activity activity;
     BrowserClient webViewClient;
@@ -152,6 +153,7 @@ class WebviewManager {
                 return false;
             }
         });
+        webView.setWebContentsDebuggingEnabled(true);
 
         ((ObservableWebView) webView).setOnScrollChangedCallback(new ObservableWebView.OnScrollChangedCallback(){
             public void onScroll(int x, int y, int oldx, int oldy){
@@ -196,17 +198,19 @@ class WebviewManager {
                         int currentKeyboardHeight = decorView.getHeight() - windowVisibleDisplayFrame.bottom;
                         // Notify listener about keyboard being shown.
                         int width = defaultParams.width;
-                        int height = defaultParams.height - (currentKeyboardHeight - 200);
+                        int minusHeight;
+                        if (bottomTabsVisible == true) {
+                            minusHeight = 290;
+                        } else {
+                            minusHeight = 200;
+                        }
+                        int height = defaultParams.height - (currentKeyboardHeight - minusHeight);
                         params = new FrameLayout.LayoutParams(width, height);
                         params.topMargin = 48;
-                        if(webUrl == null || webUrl.contains("questionnaire") || webUrl.contains("signup")) {
-                            Log.w("webUrl", "DO RESIZE");
-                            resize(params);
-                        }
+                        String heightString = String.valueOf(params.height);
+                        resize(params);
                     } else if (lastVisibleDecorViewHeight + MIN_KEYBOARD_HEIGHT_PX < visibleDecorViewHeight) {
-                        if(webUrl == null || webUrl.contains("questionnaire") || webUrl.contains("signup")) {
-                            resize(defaultParams);
-                        }
+                        resize(defaultParams);
                     }
                 }
                 // Save current decor view height for the next call.
@@ -544,6 +548,11 @@ class WebviewManager {
         }
     }
 
+    void changeDefaultParams(FrameLayout.LayoutParams newParams) {
+        defaultParams.height = newParams.height;
+        defaultParams.width = newParams.width;
+    }
+
     void resize(FrameLayout.LayoutParams params) {
         if (webView != null) {
             webView.setLayoutParams(params);
@@ -578,6 +587,12 @@ class WebviewManager {
         }
     }
 
+    void switchTabsVisibleBoolean(MethodCall call, MethodChannel.Result result) {
+        boolean tabsVisible = call.argument("tabsVisible");
+        Log.w("webUrl", "Switch tabs visible:" + bottomTabsVisible);
+        bottomTabsVisible = tabsVisible;
+    }
+
     public class WebAppInterface {
         private Context context;
         public WebAppInterface(Context context) {
@@ -587,8 +602,6 @@ class WebviewManager {
         public void postMessage(String value){
             try {
                 Handler mainHandler = new Handler(context.getMainLooper());
-                // final Map<String, String> postMessageMap = new HashMap<>();
-                // postMessageMap.put("postMessage", value);
                 final String postValue = value;
                 Runnable myRunnable = new Runnable() {
                     @Override 

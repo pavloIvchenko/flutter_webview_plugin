@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io' show Platform;
 
 const _kChannel = 'flutter_webview_plugin';
 
@@ -62,7 +63,8 @@ class FlutterWebviewPlugin {
         );
         break;
       case 'onHttpError':
-        _onHttpError.add(WebViewHttpError(call.arguments['code'], call.arguments['url']));
+        _onHttpError.add(
+            WebViewHttpError(call.arguments['code'], call.arguments['url']));
         break;
       case 'onPostMessage':
         _onPostMessage.add(call.arguments);
@@ -131,7 +133,8 @@ class FlutterWebviewPlugin {
   /// - [displayZoomControls]: display zoom controls on webview
   /// - [withOverviewMode]: enable overview mode for Android webview ( setLoadWithOverviewMode )
   /// - [useWideViewPort]: use wide viewport for Android webview ( setUseWideViewPort )
-  Future<Null> launch(String url, {
+  Future<Null> launch(
+    String url, {
     Map<String, String> headers,
     bool withJavascript,
     bool clearCache,
@@ -229,10 +232,19 @@ class FlutterWebviewPlugin {
   }
 
   // Clean cookies on WebView
-  Future<Null> cleanCookies() async => await _channel.invokeMethod('cleanCookies');
+  Future<Null> cleanCookies() async =>
+      await _channel.invokeMethod('cleanCookies');
 
   // Stops current loading process
-  Future<Null> stopLoading() async => await _channel.invokeMethod('stopLoading');
+  Future<Null> stopLoading() async =>
+      await _channel.invokeMethod('stopLoading');
+
+  Future<Null> switchTabsVisibleBoolean(bool tabsVisible) async {
+    if (Platform.isAndroid) {
+      await _channel
+          .invokeMethod('switchTabsVisibleBoolean', {'tabsVisible': tabsVisible});
+    }
+  }
 
   /// Close all Streams
   void dispose() {
@@ -273,7 +285,23 @@ class FlutterWebviewPlugin {
     };
     await _channel.invokeMethod('resize', args);
   }
+
+  Future<Null> changeDefaultParams(Rect rect) async {
+    if (Platform.isAndroid) {
+      final args = {};
+      args['rect'] = {
+        'left': rect.left,
+        'top': rect.top,
+        'width': rect.width,
+        'height': rect.height,
+      };
+      await _channel.invokeMethod('changeDefaultParams', args);
+    }
+  }
 }
+
+
+
 
 class WebViewStateChanged {
   WebViewStateChanged(this.type, this.url, this.navigationType);
