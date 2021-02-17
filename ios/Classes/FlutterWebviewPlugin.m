@@ -88,6 +88,14 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     _invalidUrlRegex = call.arguments[@"invalidUrlRegex"];
 
     if (clearCache != (id)[NSNull null] && [clearCache boolValue]) {
+        // All kinds of data
+        NSSet *websiteDataTypes = [WKWebsiteDataStore allWebsiteDataTypes];
+        // Date from
+        NSDate *dateFrom = [NSDate dateWithTimeIntervalSince1970:0];
+        // Execute
+        [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:websiteDataTypes modifiedSince:dateFrom completionHandler:^{
+           // Done
+        }];
         [[NSURLCache sharedURLCache] removeAllCachedResponses];
     }
 
@@ -132,6 +140,9 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     self.webview.hidden = [hidden boolValue];
     self.webview.scrollView.showsHorizontalScrollIndicator = [scrollBar boolValue];
     self.webview.scrollView.showsVerticalScrollIndicator = [scrollBar boolValue];
+    self.webview.scrollView.alwaysBounceVertical = NO;
+    self.webview.scrollView.bounces = NO;
+    self.webview.scrollView.showsVerticalScrollIndicator = NO;
     
     [self.webview addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:NULL];
     
@@ -194,6 +205,7 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
                 }
 
                 [self.webview loadRequest:request];
+                [self.webview reloadFromOrigin];
             }
         }
 }
